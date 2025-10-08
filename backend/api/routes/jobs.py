@@ -8,8 +8,11 @@ from backend.api.dependencies import get_current_active_user
 from backend.models.user import User
 from backend.models.job import Job
 from backend.schemas.job import JobResponse, JobSearch, JobCreate
-from backend.services.job_scraper import MockJobScraper, LinkedInJobScraper
+from backend.services.job_scraper import MockJobScraper
+from backend.services.job_api_service import UnifiedJobAPI
 from backend.services.nlp_analyzer import NLPAnalyzer
+from backend.services.auto_apply_service import rate_limiter
+from backend.core.config import settings
 from datetime import datetime
 
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
@@ -22,23 +25,35 @@ async def search_jobs(
     db: Session = Depends(get_db)
 ):
     """
-    Search for jobs on LinkedIn and save them to database.
+    Search for jobs from real job APIs (Jooble + Adzuna) and save them to database.
     
-    This endpoint scrapes LinkedIn for job postings matching the search criteria
-    and stores them in the database for later use.
+    This endpoint fetches jobs from multiple sources and stores them in the database.
+    Falls back to mock data if API keys are not configured.
     """
-    # Use MockJobScraper for development (no actual web scraping)
-    # For production, use LinkedInJobScraper with proper credentials
-    scraper = MockJobScraper()
+    # Try real APIs first
+    job_api = UnifiedJobAPI()
     
-    # Search for jobs
-    jobs_data = scraper.search_jobs(
-        keywords=search_params.keywords or "",
-        location=search_params.location or "",
-        experience_level=search_params.experience_level,
-        job_type=search_params.job_type,
-        limit=search_params.limit
-    )
+    # Check if API keys are configured
+    has_api_keys = (settings.JOOBLE_API_KEY or settings.ADZUNA_API_KEY)
+    
+    if has_api_keys:
+        # Use real job APIs
+        jobs_data = job_api.search_all_sources(
+            keywords=search_params.keywords or "",
+            location=search_params.location or "",
+            limit=search_params.limit
+        )
+    else:
+        # Fallback to mock data
+        print("Using mock data - add Jooble/Adzuna API keys for real jobs")
+        scraper = MockJobScraper()
+        jobs_data = scraper.search_jobs(
+            keywords=search_params.keywords or "",
+            location=search_params.location or "",
+            experience_level=search_params.experience_level,
+            job_type=search_params.job_type,
+            limit=search_params.limit
+        )
     
     # Analyze and save jobs to database
     analyzer = NLPAnalyzer()
@@ -174,5 +189,21 @@ async def delete_job(
     db.commit()
     
     return None
+
+
+@router.get("/rate-limit/status")
+async def get_rate_limit_status(
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get current rate limit status for auto-apply."""
+    remaining = rate_limiter.get_remaining()
+    
+    return {
+        'daily_limit': rate_limiter.daily_limit,
+        'used_today': rate_limiter.applications_today,
+        'remaining_today': remaining,
+        'can_apply': rate_limiter.can_apply(),
+        'reset_date': str(rate_limiter.last_reset)
+    }
 
 

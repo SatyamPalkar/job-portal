@@ -94,7 +94,7 @@ export interface ResumeOptimizeRequest {
 export interface ResumeOptimizeResponse {
   optimized_resume_id: number;
   match_score: number;
-  optimizations_applied: Array<Record<string, any>>;
+  optimizations_applied: string[];
   suggested_improvements: string[];
   optimized_content: string;
 }

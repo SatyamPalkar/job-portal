@@ -16,8 +16,12 @@ from backend.schemas.application import (
 )
 from backend.services.nlp_analyzer import NLPAnalyzer
 from backend.services.ai_optimizer import AIResumeOptimizer
-from backend.services.resume_generator import ResumeGenerator
+from backend.services.professional_resume_generator import ProfessionalResumeGenerator
+from backend.services.auto_apply_service import AutoApplyService, rate_limiter
+from backend.services.scheduler_service import application_queue
+from backend.core.config import settings
 from datetime import datetime
+import asyncio
 
 router = APIRouter(prefix="/applications", tags=["Applications"])
 
@@ -222,8 +226,8 @@ async def download_application_resume(
         'certifications': resume.certifications,
     }
     
-    # Generate resume
-    generator = ResumeGenerator()
+    # Generate resume with professional formatting
+    generator = ProfessionalResumeGenerator()
     
     try:
         if format == 'pdf':
@@ -249,6 +253,104 @@ async def download_application_resume(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error generating resume: {str(e)}"
         )
+
+
+@router.post("/{application_id}/auto-apply")
+async def auto_apply_to_job(
+    application_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Automatically apply to job using Playwright automation.
+    
+    This will:
+    1. Check rate limits (50 applications/day)
+    2. Queue the application for processing
+    3. Auto-fill the application form
+    4. Attach optimized resume
+    5. Return status (does not auto-submit for safety)
+    """
+    if not settings.AUTO_APPLY_ENABLED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Auto-apply feature is disabled. Set AUTO_APPLY_ENABLED=true in .env"
+        )
+    
+    # Check rate limit
+    if not rate_limiter.can_apply():
+        remaining = rate_limiter.get_remaining()
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Daily application limit reached ({rate_limiter.daily_limit}). {remaining} applications remaining for today."
+        )
+    
+    # Get application
+    application = db.query(Application).filter(
+        Application.id == application_id,
+        Application.user_id == current_user.id
+    ).first()
+    
+    if not application:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Application not found"
+        )
+    
+    # Get job and resume
+    job = db.query(Job).filter(Job.id == application.job_id).first()
+    resume = db.query(Resume).filter(Resume.id == application.resume_id).first()
+    
+    if not job or not resume:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Job or resume not found"
+        )
+    
+    # Generate resume file if needed
+    generator = ProfessionalResumeGenerator()
+    resume_data = {
+        'name': current_user.full_name or current_user.username,
+        'email': current_user.email,
+        'summary': resume.summary,
+        'experience': resume.experience,
+        'education': resume.education,
+        'skills': resume.skills,
+        'projects': resume.projects,
+    }
+    
+    resume_file = generator.generate_pdf(resume_data, f"resume_app_{application_id}.pdf")
+    
+    # Add to application queue
+    await application_queue.add_application(
+        job_url=job.source_url or "",
+        resume_path=resume_file,
+        cover_letter=application.cover_letter,
+        user_id=current_user.id
+    )
+    
+    return {
+        'status': 'queued',
+        'message': 'Application queued for processing',
+        'application_id': application_id,
+        'queue_position': len(application_queue.queue),
+        'estimated_processing_time': f"{len(application_queue.queue) * 60} seconds",
+        'daily_limit_remaining': rate_limiter.get_remaining() - 1
+    }
+
+
+@router.get("/queue/status")
+async def get_queue_status(
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get status of the auto-apply queue."""
+    return {
+        'queue_length': len(application_queue.queue),
+        'processing': application_queue.processing,
+        'daily_limit': rate_limiter.daily_limit,
+        'remaining_today': rate_limiter.get_remaining(),
+        'next_reset': str(datetime.now().date())
+    }
 
 
 @router.delete("/{application_id}", status_code=status.HTTP_204_NO_CONTENT)

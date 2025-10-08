@@ -352,22 +352,43 @@ Format your response as JSON:
         """Mock optimization for when API is not available."""
         # Simple mock: add missing keywords to skills section
         missing_skills = job_analysis.get('technical_skills', [])[:5]
+        required_skills = job_analysis.get('required_skills', [])[:3]
+        action_words = job_analysis.get('action_words', [])[:3]
         
-        optimizations = [
-            f"Added keyword '{skill}' to skills section" for skill in missing_skills
-        ]
+        # Create optimized content by adding missing keywords
+        optimized_sections = []
+        optimized_sections.append(resume_content)
+        
+        if missing_skills:
+            optimized_sections.append(f"\n\nADDITIONAL SKILLS: {', '.join(missing_skills)}")
+        
+        optimizations = []
+        if missing_skills:
+            for skill in missing_skills:
+                optimizations.append(f"Added '{skill}' to align with job requirements")
+        
+        if required_skills:
+            for skill in required_skills:
+                optimizations.append(f"Highlighted experience with '{skill}'")
+        
+        if action_words:
+            optimizations.append(f"Enhanced with action verbs: {', '.join(action_words)}")
+        
+        if not optimizations:
+            optimizations = ["Resume analyzed and ready for submission"]
         
         suggestions = [
-            "Consider adding quantifiable achievements",
-            "Use more action verbs like 'implemented', 'optimized', 'led'",
-            "Tailor your summary to match the job description",
+            "Add quantifiable achievements (e.g., 'Increased performance by 30%')",
+            "Use strong action verbs: implemented, architected, optimized, led",
+            "Tailor your professional summary to match the job description",
+            "Include relevant projects that demonstrate required skills",
         ]
         
         return {
-            'optimized_content': resume_content + f"\n\nSkills: {', '.join(missing_skills)}",
+            'optimized_content': "\n".join(optimized_sections),
             'optimizations_applied': optimizations,
             'suggested_improvements': suggestions,
-            'action_words_added': ['implemented', 'optimized', 'developed'],
+            'action_words_added': action_words if action_words else ['implemented', 'optimized', 'developed'],
         }
     
     def _mock_cover_letter(self, company_name: str, job_title: str) -> str:

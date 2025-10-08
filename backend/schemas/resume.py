@@ -40,7 +40,7 @@ class ResumeOptimizeResponse(BaseModel):
     """Schema for resume optimization response."""
     optimized_resume_id: int
     match_score: float
-    optimizations_applied: List[Dict[str, Any]]
+    optimizations_applied: List[str]  # Changed to accept strings
     suggested_improvements: List[str]
     optimized_content: str
 

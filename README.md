@@ -4,13 +4,21 @@ A powerful SaaS application that reads LinkedIn jobs, analyzes job descriptions,
 
 ## Features
 
-- 🔍 **LinkedIn Job Scraper**: Automatically fetch job postings related to your field
-- 🤖 **AI-Powered Analysis**: Uses Hugging Face models (Mistral-7B/Llama-2) to analyze job descriptions and extract key requirements
+### Core Features
+- 🔍 **Real Job APIs**: Fetch jobs from Jooble + Adzuna (FREE APIs)
+- 🤖 **AI-Powered Analysis**: Uses Hugging Face models (Mistral-7B/Llama-2) to analyze job descriptions
 - 📝 **Resume Optimization**: Automatically updates your resume with relevant action words and projects
-- 🎯 **Smart Matching**: Matches your experience with job requirements
-- 📊 **Analytics Dashboard**: Track application success rates and optimization metrics
-- 🔐 **Secure Authentication**: User accounts with secure token-based authentication
+- 🎯 **Smart Matching**: Matches your experience with job requirements (0-100% score)
 - 📄 **Multiple Formats**: Export optimized resumes in PDF, DOCX, and TXT formats
+- 🔐 **Secure Authentication**: User accounts with JWT token-based authentication
+
+### Automation Features (NEW!)
+- 🤖 **Auto-Apply**: Playwright automation to fill job applications automatically
+- ⏰ **Job Scheduler**: Fetch jobs every 6 hours automatically (Cron-based)
+- 🚦 **Rate Limiting**: 50 applications/day with 20-90s random delays
+- 📊 **Application Queue**: Smart background processing of applications
+- 🎯 **Multi-Source**: Combines jobs from Jooble, Adzuna, and mock data
+- 📈 **Analytics Dashboard**: Track application success rates and optimization metrics
 
 ## Tech Stack
 

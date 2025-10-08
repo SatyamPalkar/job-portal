@@ -11,6 +11,7 @@ from backend.core.security import (
 from backend.core.config import settings
 from backend.models.user import User
 from backend.schemas.user import UserCreate, UserLogin, UserResponse, Token
+from backend.api.dependencies import get_current_active_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -74,8 +75,7 @@ async def login(user_data: UserLogin, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_db)
+    current_user: User = Depends(get_current_active_user)
 ):
     """Get current user information."""
     return current_user

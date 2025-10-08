@@ -177,9 +177,39 @@ const Applications: React.FC = () => {
                     <div className="mb-4 p-4 bg-yellow-50 rounded-md">
                       <p className="text-sm font-medium text-yellow-900 mb-2">Suggestions for Improvement:</p>
                       <ul className="list-disc list-inside text-sm text-yellow-800 space-y-1">
-                        {JSON.parse(application.suggested_improvements).slice(0, 3).map((suggestion: any, idx: number) => (
-                          <li key={idx}>{typeof suggestion === 'string' ? suggestion : suggestion.suggestion}</li>
-                        ))}
+                        {(() => {
+                          try {
+                            const suggestions = JSON.parse(application.suggested_improvements);
+                            return suggestions.slice(0, 3).map((suggestion: any, idx: number) => (
+                              <li key={idx}>
+                                {typeof suggestion === 'string' 
+                                  ? suggestion 
+                                  : suggestion.suggestion || JSON.stringify(suggestion)
+                                }
+                              </li>
+                            ));
+                          } catch {
+                            return <li>{application.suggested_improvements}</li>;
+                          }
+                        })()}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {application.optimizations_applied && (
+                    <div className="mb-4 p-4 bg-green-50 rounded-md">
+                      <p className="text-sm font-medium text-green-900 mb-2">Optimizations Applied:</p>
+                      <ul className="list-disc list-inside text-sm text-green-800 space-y-1">
+                        {(() => {
+                          try {
+                            const optimizations = JSON.parse(application.optimizations_applied);
+                            return optimizations.slice(0, 5).map((opt: string, idx: number) => (
+                              <li key={idx}>{opt}</li>
+                            ));
+                          } catch {
+                            return <li>{application.optimizations_applied}</li>;
+                          }
+                        })()}
                       </ul>
                     </div>
                   )}

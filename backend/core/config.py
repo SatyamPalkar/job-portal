@@ -24,9 +24,24 @@ class Settings(BaseSettings):
     HUGGINGFACE_API_KEY: str = ""
     HUGGINGFACE_MODEL: str = "mistralai/Mistral-7B-Instruct-v0.2"  # Can also use meta-llama/Llama-2-7b-chat-hf
     
-    # LinkedIn
+    # Job APIs
+    JOOBLE_API_KEY: str = ""  # Get free key from https://jooble.org/api/about
+    ADZUNA_APP_ID: str = ""  # Get free key from https://developer.adzuna.com/
+    ADZUNA_API_KEY: str = ""
+    ADZUNA_COUNTRY: str = "us"  # us, gb, ca, au, etc.
+    
+    # LinkedIn (optional)
+    LINKEDIN_EMAIL: str = ""
+    LINKEDIN_PASSWORD: str = ""
     LINKEDIN_CLIENT_ID: str = ""
     LINKEDIN_CLIENT_SECRET: str = ""
+    
+    # Automation Settings
+    AUTO_APPLY_ENABLED: bool = False  # Set to True to enable auto-apply
+    DAILY_APPLICATION_LIMIT: int = 50
+    APPLICATION_DELAY_MIN: int = 20  # seconds
+    APPLICATION_DELAY_MAX: int = 90  # seconds
+    ENABLE_JOB_SCHEDULER: bool = False  # Set to True to enable automated job fetching
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
