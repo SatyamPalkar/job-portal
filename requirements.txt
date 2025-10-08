@@ -1,0 +1,31 @@
+# Backend Framework (Python 3.9+ compatible with pre-built wheels)
+fastapi==0.109.0
+uvicorn==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+email-validator==2.3.0
+
+# Database
+sqlalchemy==2.0.25
+
+# Authentication
+python-jose==3.3.0
+passlib==1.7.4
+python-multipart==0.0.9
+bcrypt==4.1.2
+
+# Web Scraping & HTTP
+beautifulsoup4==4.12.2
+requests==2.31.0
+
+# AI & NLP (lightweight - no heavy dependencies)
+nltk==3.8.1
+
+# Resume Processing
+python-docx==1.1.0
+PyPDF2==3.0.1
+reportlab==4.0.7
+
+# Utilities
+python-dotenv==1.0.0
+
