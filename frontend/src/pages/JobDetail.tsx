@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
-import { jobApi, resumeApi, applicationApi } from '@/services/api';
+import { jobApi, resumeApi } from '@/services/api';
 import type { Job, Resume } from '@/types';
 import { MapPin, Building2, Briefcase, ExternalLink, FileText } from 'lucide-react';
 
@@ -16,7 +16,6 @@ const JobDetail: React.FC = () => {
   const [optimizationLevel, setOptimizationLevel] = useState<'conservative' | 'balanced' | 'aggressive'>('balanced');
   const [isLoading, setIsLoading] = useState(true);
   const [isOptimizing, setIsOptimizing] = useState(false);
-  const [showApplyForm, setShowApplyForm] = useState(false);
 
   useEffect(() => {
     if (id) {
