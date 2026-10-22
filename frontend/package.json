@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:pages": "tsc && vite build --config vite.pages.config.ts && node -e \"require('fs').writeFileSync('../docs/.nojekyll', '')\"",
+    "test:workspace": "node --test tests/workspace.test.mjs",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },

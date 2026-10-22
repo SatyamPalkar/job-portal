@@ -1,5 +1,12 @@
 # Resume Optimizer SaaS
 
+**Free GitHub Pages edition:** The repository also includes a browser workspace
+for saving job descriptions and resume text, comparing keywords, and tracking
+application progress. It stores data in your browser, supports JSON backups, and
+does not require a paid backend. See [PAGES_DEPLOYMENT.md](PAGES_DEPLOYMENT.md) for
+the supported features and build instructions. The SaaS features below describe
+the separate server-backed edition.
+
 A powerful SaaS application that reads LinkedIn jobs, analyzes job descriptions, and automatically optimizes your resume with relevant action words and projects to qualify your application.
 
 ## Features
